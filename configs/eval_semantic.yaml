@@ -1,0 +1,96 @@
+MODEL:
+  PIXEL_MEAN : [127.5, 127.5, 127.5]
+  PIXEL_STD : [127.5, 127.5, 127.5]
+  META_ARCHITECTURE: "EOVSAM"
+
+  SAM3:
+    BPE_PATH: "sam3/assets/bpe_simple_vocab_16e6.txt.gz"
+    ENABLE_SEGMENTATION: True
+    NUM_CDT: 1
+    USE_PIXEL_PROJ: True
+    USE_PE_TEXT: False
+    USE_SOFTMAX: True
+    ADD_PIXELFEAT: True
+
+    ALPHA: 0.7
+    BETA: 1.0
+
+  ATTNPOOL:
+    ENABLE: True
+    NUM_PRED_MASKS: 32
+    CLASS_WEIGHT: 1.0
+
+  WEIGHTS: weights/eovsam.pth
+
+DATASETS:
+  TRAIN: ("coco_2017_train_panoptic", )
+  TEST: ("openvocab_ade20k_panoptic_val","openvocab_ade20k_full_sem_seg_val","openvocab_pascal20_sem_seg_val",'openvocab_pascal_ctx459_sem_seg_val', 'openvocab_pascal_ctx59_sem_seg_val',)
+
+
+SOLVER:
+  CLIP_GRADIENTS:
+    ENABLED: True
+    CLIP_TYPE: "full_model"
+    CLIP_VALUE: 0.1
+    NORM_TYPE: 2.0
+  AMP:
+    ENABLED: True
+  IMS_PER_BATCH: 8
+  BASE_LR: 0.0001
+  LR_SCHEDULER_NAME: WarmupPolyLR
+  STEPS: (40000, 50000)
+  MAX_ITER: 45000
+  CHECKPOINT_PERIOD: 5000
+
+  WEIGHT_DECAY: 0.0001
+  WARMUP_ITERS: 2500
+
+
+  CLASS_WEIGHT: 3.0
+  MASK_WEIGHT: 5.0
+  DICE_WEIGHT: 5.0
+  BBOX_WEIGHT: 5.0
+  GIOU_WEIGHT: 2.0
+
+  USE_AUX : True
+  TRAIN_OUT_VOCAB: True
+
+SEED: 3407
+
+INPUT:
+  DATASET_MAPPER_NAME: "coco_combine_lsj"
+  IMAGE_SIZE: 1152
+  MIN_SCALE: 0.5
+  MAX_SCALE: 2.0
+  FORMAT: "RGB"
+  COLOR_AUG_SSD: True
+  MASK_FORMAT: "bitmask"
+  MIN_SIZE_TEST: 1152
+  MAX_SIZE_TEST: 1152
+
+DATALOADER:
+  SAMPLER_TRAIN: "MultiDatasetSampler"
+
+  DATASET_RATIO: [1.0]
+
+  DATASET_BS: [4]
+
+  USE_RFS: [False]
+
+  DATASET_ANN: ['box']
+
+  NUM_WORKERS: 4
+  FILTER_EMPTY_ANNOTATIONS: True
+  ASPECT_RATIO_GROUPING: True
+
+  USE_DIFF_BS_SIZE: True
+
+TEST:
+  EVAL_PERIOD: 5000
+  SEMANTIC_ON: True
+  # INSTANCE_ON: True
+  # PANOPTIC_ON: True
+VERSION: 2
+
+OUTPUT_DIR: ./out/eval/semantic
+

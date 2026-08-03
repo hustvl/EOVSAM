@@ -1,0 +1,44 @@
+MODEL:
+  PIXEL_MEAN : [127.5, 127.5, 127.5]
+  PIXEL_STD : [127.5, 127.5, 127.5]
+  META_ARCHITECTURE: "SAM3Wrapper"
+  SAM3:
+    BPE_PATH: "sam3/assets/bpe_simple_vocab_16e6.txt.gz"
+    ENABLE_SEGMENTATION: True
+    CYCLE_INFER_GT_CLASSES_ONLY: False
+  WEIGHTS: weights/sam3.pt
+DATASETS:
+  TRAIN: ("openvocab_coco_2017_train_stuff_sem_seg",)  #  openvocab_coco_2017_train_panoptic_with_sem_seg
+  TEST: ('openvocab_ade20k_panoptic_val',) 
+  # TEST: ("openvocab_ade20k_full_sem_seg_val","openvocab_pascal20_sem_seg_val",'openvocab_pascal_ctx459_sem_seg_val', 'openvocab_pascal_ctx59_sem_seg_val',)
+
+
+SOLVER:
+  IMS_PER_BATCH: 1
+  BASE_LR: 0.0001
+
+
+INPUT:
+  DATASET_MAPPER_NAME: "mask_former_semantic" 
+
+  SAM3_SQUARE_SIZE: 1008
+  MIN_SIZE_TRAIN: (1008,)
+
+  MAX_SIZE_TRAIN: 2048
+  
+
+  CROP:
+    ENABLED: True
+    TYPE: "absolute"
+    SIZE: (1008, 1008)
+
+
+TEST:
+  SEMANTIC_ON: True
+  INSTANCE_ON: False
+  # PANOPTIC_ON: True
+  PANOPTIC_OBJECT_MASK_THRESHOLD: 0.01
+  PANOPTIC_OVERLAP_THRESHOLD: 0.8
+  PANOPTIC_CHUNK_SIZE: 16
+  
+OUTPUT_DIR: ./out/SAM3/
