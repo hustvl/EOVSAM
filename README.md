@@ -4,7 +4,7 @@
 
 <h3>Efficient Open-Vocabulary Segmentation with SAM 3 in One Pass</h3>
 
-[![arXiv paper](https://img.shields.io/badge/arXiv-Paper-red)](https://arxiv.org/abs/2608.00000)
+[![arXiv paper](https://img.shields.io/badge/arXiv-Paper-red)](https://arxiv.org/abs/2608.02284)
 [![Hugging Face Weights](https://img.shields.io/badge/HuggingFace-%F0%9F%A4%97_Weight-orange)](https://huggingface.co/HaominPeng/EOVSAM)
 
 Haomin Peng<sup>1</sup>, Yongkang Li<sup>1</sup>, Zhaoxiang Liu<sup>2,3</sup>, Xiaojie Jin<sup>4</sup>, Shiguo Lian<sup>2,3</sup>, Yunchao Wei<sup>4</sup>, Xinggang Wang<sup>1📧</sup><br>
@@ -99,10 +99,13 @@ This project is built upon [NVIDIA RADIO](https://github.com/NVlabs/RADIO), [SAM
 If you find EOVSAM useful, please cite:
 
 ~~~
-@article{eovsam2026,
-  title={EOVSAM: Efficient Open-Vocabulary Segmentation with SAM 3 in One Pass},
-  author={Peng, Haomin and Li, Yongkang and Liu, Zhaoxiang and Jin, Xiaojie and Lian, Shiguo and Wei, Yunchao and Wang, Xinggang},
-  journal={arXiv preprint arXiv:2608.00000},
-  year={2026}
+@misc{peng2026eovsamefficientopenvocabularysegmentation,
+      title={EOVSAM: Efficient Open-Vocabulary Segmentation with SAM 3 in One Pass}, 
+      author={Haomin Peng and Yongkang Li and Zhaoxiang Liu and Xiaojie Jin and Shiguo Lian and Yunchao Wei and Xinggang Wang},
+      year={2026},
+      eprint={2608.02284},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2608.02284}, 
 }
 ~~~
