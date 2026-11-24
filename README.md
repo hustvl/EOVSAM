@@ -33,8 +33,6 @@ Open-vocabulary segmentation identifies and segments objects from arbitrary text
 | EOVSAM | 16.6 | 39.2 | 20.5 | 60.8 | 97.1 | 31.2 | [eovsam](https://huggingface.co/HaominPeng/EOVSAM/resolve/main/eovsam.pth) |
 | SAM 3 | 14.0 | 37.8 | 18.3 | 58.3 | 96.3 | - | [sam3](https://huggingface.co/facebook/sam3/resolve/main/sam3.pt?download=true) |
 
-The EOVSAM row reports the results from Tables 1 and 2 of the revised manuscript.
-
 
 ## Installation
 
