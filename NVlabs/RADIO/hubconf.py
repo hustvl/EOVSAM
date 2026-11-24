@@ -32,7 +32,7 @@ def radio_model(
     progress: bool = True,
     adaptor_names: Union[str, List[str]] = None,
     vitdet_window_size: Optional[int] = None,
-    num_prompts_to_insert: int = 200,
+    num_prompts_to_insert: Optional[int] = None,
     insert_start_layer: int = 1,
     insert_end_layer: int = -1,
     return_checkpoint: bool = False,

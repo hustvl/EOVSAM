@@ -39,7 +39,7 @@ class RADIOModel(nn.Module):
         adaptors: Dict[str, AdaptorBase] = None,
         feature_normalizer: Optional[FeatureNormalizer] = None,
         inter_feature_normalizer: Optional[IntermediateFeatureNormalizer] = None,
-        num_prompts_to_insert: int = 200,
+        num_prompts_to_insert: Optional[int] = None,
         insert_start_layer: int = 1,
         insert_end_layer: int = -1,
     ):
@@ -70,41 +70,42 @@ class RADIOModel(nn.Module):
         else:
             self.max_token_slot = -1
 
-        from .vpt import PromptInjector
         for param in self.parameters():
             param.requires_grad = False
 
+        self.uses_vpt = num_prompts_to_insert is not None and hasattr(self.model, "blocks")
+        if self.uses_vpt:
+            from .vpt import PromptInjector
 
-        embed_dim = self.embed_dim
-        self.num_prompts_to_insert = int(num_prompts_to_insert)
-        num_prompts_to_insert = self.num_prompts_to_insert
-        self.insert_start_layer = int(insert_start_layer)
-        self.insert_end_layer = int(insert_end_layer)
-
-        if hasattr(self.model, 'blocks'):
-            skip_tokens = self.num_summary_tokens
-
-            injector = PromptInjector(
+            self.model.blocks = PromptInjector(
                 original_blocks=self.model.blocks,
                 num_prompts=num_prompts_to_insert,
-                embed_dim=embed_dim,
-                num_skip=skip_tokens,
-                insert_start_layer=self.insert_start_layer,
-                insert_end_layer=self.insert_end_layer,
+                embed_dim=self.embed_dim,
+                num_skip=self.num_summary_tokens,
+                insert_start_layer=insert_start_layer,
+                insert_end_layer=insert_end_layer,
             )
-            self.model.blocks = injector
-            start_layer = injector.active_layers[0] + 1
-            end_layer = injector.active_layers[-1] + 1
-            total_layers = injector.num_layers
-        #     print(
-        #         "VPT injected successfully: "
-        #         f"{num_prompts_to_insert} prompts per selected layer, "
-        #         f"layers {start_layer}-{end_layer} from the input side, "
-        #         f"total ViT layers={total_layers}, "
-        #         f"skip tokens={skip_tokens}."
-        #     )
-        # else:
-        #     print("Warning: model.blocks was not found, VPT injection was skipped.")
+
+    def _load_from_state_dict(
+        self, state_dict, prefix, local_metadata, strict, missing_keys, unexpected_keys, error_msgs
+    ):
+        # Published EOVSAM checkpoints wrapped these blocks even with VPT disabled.
+        blocks_prefix = prefix + "model.blocks."
+        wrapped_prefix = blocks_prefix + "original_blocks."
+        tuner_prefix = blocks_prefix + "tuner."
+        dino_prefix = prefix + "adaptors.dino_v3_7b."
+        drop_dino = "dino_v3_7b" not in self.adaptors
+        for key in list(state_dict):
+            if not self.uses_vpt and key.startswith(wrapped_prefix):
+                block_key = blocks_prefix + key[len(wrapped_prefix):]
+                state_dict.setdefault(block_key, state_dict.pop(key))
+            elif not self.uses_vpt and key.startswith(tuner_prefix):
+                state_dict.pop(key)
+            elif drop_dino and key.startswith(dino_prefix):
+                state_dict.pop(key)
+        super()._load_from_state_dict(
+            state_dict, prefix, local_metadata, strict, missing_keys, unexpected_keys, error_msgs
+        )
 
     @property
     def num_summary_tokens(self) -> int:

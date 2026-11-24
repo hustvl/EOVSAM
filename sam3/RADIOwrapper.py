@@ -64,9 +64,8 @@ class RADIO_Adaptor(nn.Module):
 
         with torch.autocast('cuda', dtype=torch.bfloat16):
             student_output = self.student(images)
-            if isinstance(student_output, dict):
-                features = student_output['sam3'][1]
-                dino_features = student_output['dino_v3_7b'][1]
+            features = student_output['sam3'][1]
+            dino_output = student_output.get('dino_v3_7b')
             _, backbone_features = student_output['backbone']
             sig2_vis_features = self.sig2_adaptor.head_mlp(backbone_features)
             del student_output
@@ -83,16 +82,14 @@ class RADIO_Adaptor(nn.Module):
 
         sig2_vis_features = rearrange(sig2_vis_features, 'b (r c) d -> b d r c', r=rows, c=cols)
 
-        dino_features = rearrange(dino_features, 'b (r c) d -> b d r c', r=rows, c=cols)
-
         other_output = {
             "siglip2-g": {
                 "features": sig2_vis_features.float(),
             },
-            "dino_v3_7b":{
-                "features": dino_features.float(),
-            }
         }
+        if dino_output is not None:
+            dino_features = rearrange(dino_output[1], 'b (r c) d -> b d r c', r=rows, c=cols)
+            other_output["dino_v3_7b"] = {"features": dino_features.float()}
         # Return as a list (ViT returns list of outputs from global attention blocks)
         return [other_output, features.float()]
 
@@ -101,9 +98,10 @@ def load_radio_model(
     model_version: str,
     device: str = 'cuda',
     vitdet: Optional[int] = None,
-    num_prompts_to_insert: int = 200,
+    num_prompts_to_insert: Optional[int] = None,
     insert_start_layer: int = 1,
     insert_end_layer: int = -1,
+    use_dino_adapter: bool = False,
 ):
     """
     Load RADIO model from torch.hub.
@@ -125,12 +123,16 @@ def load_radio_model(
     if insert_end_layer is not None:
         extra['insert_end_layer'] = int(insert_end_layer)
 
+    adaptor_names = ["sam3", "siglip2-g"]
+    if use_dino_adapter:
+        adaptor_names.append("dino_v3_7b")
+
     print(f"Loading RADIO model from {model_version}...")
     model: torch.nn.Module = torch.hub.load(
         'NVlabs/RADIO',
         'radio_model',
         model_version,
-        adaptor_names=['sam3','siglip2-g','dino_v3_7b'],
+        adaptor_names=adaptor_names,
         source='local',
         **extra,
     )

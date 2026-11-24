@@ -121,11 +121,14 @@ class EOVSAM(nn.Module):
             self.detector.eval()
         print("SAM3 created successfully!")
 
+        self.vpt_enable = cfg.MODEL.VPT.ENABLE
+        self.use_map_adapter = cfg.MODEL.MAP_ADAPTER.ENABLE
         radio_model = load_radio_model(
             "c-radio_v4-h",
             device=self.pixel_mean.device,
             vitdet=None,
-            num_prompts_to_insert=cfg.MODEL.VPT.NUM_PROMPTS_TO_INSERT,
+            num_prompts_to_insert=cfg.MODEL.VPT.NUM_PROMPTS_TO_INSERT if self.vpt_enable else None,
+            use_dino_adapter=self.use_map_adapter,
             insert_start_layer=cfg.MODEL.VPT.START_LAYER,
             insert_end_layer=cfg.MODEL.VPT.END_LAYER,
         )
@@ -195,7 +198,6 @@ class EOVSAM(nn.Module):
             self.mask_adapter_weight_dict = {"loss_ce": cfg.MODEL.MASK_ADAPTER.CLASS_WEIGHT, "loss_cosine": cfg.MODEL.MASK_ADAPTER.COS_WEIGHT}
             self.out_vocab_logit_scale = nn.Parameter(torch.ones([]) * np.log(1 / 0.07))
 
-        self.use_map_adapter = cfg.MODEL.MAP_ADAPTER.ENABLE
         self.map_adapter_train_only = getattr(cfg.MODEL.MAP_ADAPTER, "TRAIN_ONLY", False)
         if self.use_map_adapter:
             self.map_adapter = build_map_adapter(cfg, cfg.MODEL.MAP_ADAPTER.NAME)
@@ -233,16 +235,9 @@ class EOVSAM(nn.Module):
 
         self.use_dot_prod_head = cfg.MODEL.SAM3.USE_DOT_PROD_HEAD
 
-        self.vpt_enable = cfg.MODEL.VPT.ENABLE
         self.vpt_grad_checkpoint = getattr(cfg.MODEL.VPT, "GRAD_CHECKPOINT", False)
-        radio_blocks = getattr(getattr(self.radio_adaptor, "student", None), "model", None)
-        radio_blocks = getattr(radio_blocks, "blocks", None)
-        if hasattr(radio_blocks, "is_active"):
-            radio_blocks.is_active = self.vpt_enable
         if self.vpt_enable and self.vpt_grad_checkpoint:
             set_radio_grad_checkpointing(self.radio_adaptor.student, True)
-        elif hasattr(radio_blocks, "grad_checkpointing"):
-            radio_blocks.grad_checkpointing = False
 
 
         self.PROMPT = VILD_PROMPT

@@ -33,8 +33,8 @@ def add_sam3_config(cfg):
     cfg.MODEL.SAM3.ADD_PIXELFEAT = False
     cfg.MODEL.SAM3.USE_DOT_PROD_HEAD = False
 
-    cfg.MODEL.SAM3.ALPHA = 0.0
-    cfg.MODEL.SAM3.BETA = 0.0
+    cfg.MODEL.SAM3.ALPHA = 0.8
+    cfg.MODEL.SAM3.BETA = 1.0
 
     cfg.MODEL.SAM3.ORACLE_SELECT = False
 
