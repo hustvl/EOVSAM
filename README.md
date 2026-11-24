@@ -30,10 +30,10 @@ Open-vocabulary segmentation identifies and segments objects from arbitrary text
 
 | Model | A-847 | A-150 | PC-459 | PC-59 | PAS-20 | ADE20K PQ | Download |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
-| EOVSAM | 16.6358 | 39.2140 | 20.5704 | 60.8294 | 97.0746 | 31.1216 | [eovsam](https://huggingface.co/HaominPeng/EOVSAM/resolve/main/eovsam.pth) |
+| EOVSAM | 16.6 | 39.2 | 20.5 | 60.8 | 97.1 | 31.2 | [eovsam](https://huggingface.co/HaominPeng/EOVSAM/resolve/main/eovsam.pth) |
 | SAM 3 | 14.0 | 37.8 | 18.3 | 58.3 | 96.3 | - | [sam3](https://huggingface.co/facebook/sam3/resolve/main/sam3.pt?download=true) |
 
-EOVSAM results were measured using the released checkpoint, a maximum image side of 1152, and geometric ensembling coefficients of 0.8 and 1.0.
+The EOVSAM row reports the results from Tables 1 and 2 of the revised manuscript.
 
 
 ## Installation
